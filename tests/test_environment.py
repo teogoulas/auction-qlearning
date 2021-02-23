@@ -11,7 +11,7 @@ for episode in range(0, NUM_EPISODES):
 
     while not done:
 
-        action = Action(0, env.action_space.sample(), env.action_space.sample())
+        action = Action(0, env.action_space.sample() - 1, env.action_space.sample() - 1)
         n_state, reward, done, info = env.step(action)
         score += reward
 
