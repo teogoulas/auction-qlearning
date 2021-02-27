@@ -1,7 +1,8 @@
 import random
 
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import numpy as np
+from plotly.subplots import make_subplots
 
 from environment.action import Action
 from environment.environment import Environment
@@ -9,6 +10,7 @@ from utils.constants import NUM_EPISODES, EXPLORATION_RATE, LEARNING_RATE, DISCO
     EXPLORATION_DECAY_RATE
 
 if __name__ == '__main__':
+    colors = ['indianred', 'lightsalmon', 'crimson', 'blue', 'green', 'purple']
     environments = {0: Environment(), 1: Environment()}
     state_space_size = environments[0].action_space.n
     observation_space_size = environments[0].observation_space.n
@@ -43,8 +45,10 @@ if __name__ == '__main__':
                 agent_action = Action(agent, action[agent], action[0 if agent == 1 else 1])
                 n_state, reward, n_done, info = environments[agent].step(agent_action)
                 agent_q = q_table[agent]
-                q_table[agent][state[agent], action[agent]] = q_table[agent][state[agent], action[agent]] * (1 - LEARNING_RATE) + \
-                                             LEARNING_RATE * (reward + DISCOUNT_RATE * np.max(q_table[agent][n_state, :]))
+                q_table[agent][state[agent], action[agent]] = q_table[agent][state[agent], action[agent]] * (
+                        1 - LEARNING_RATE) + \
+                                                              LEARNING_RATE * (reward + DISCOUNT_RATE * np.max(
+                    q_table[agent][n_state, :]))
 
                 score[agent] += reward
                 done = n_done
@@ -56,6 +60,27 @@ if __name__ == '__main__':
         for agent in range(0, 2):
             rewards_all_episodes[agent].append(score[agent])
 
+    figure = make_subplots(rows=1, cols=2, subplot_titles=("Agent 1", "Agent 2"))
+    figure.update_xaxes(title_text="episodes")
+    figure.update_yaxes(title_text="total reward per episode")
+
+    layout = {
+        'barmode': 'group',
+        'xaxis_tickangle': -45,
+        'title': {
+            'text': "Agents rewards per episode",
+            'y': 1.0,
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top'
+        }
+    }
+    figure.update_layout(layout)
+
     for agent in range(0, 2):
-        plt.plot(rewards_all_episodes[agent])
-        plt.savefig(f'rewards_agent{agent}.png')
+        figure.add_trace(go.Scatter(y=rewards_all_episodes[agent],
+                                    mode='lines',
+                                    line=dict(color=colors[agent], width=2),
+                                    name=f'agent {agent}'), row=1, col=agent+1)
+
+    figure.show()

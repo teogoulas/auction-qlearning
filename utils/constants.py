@@ -1,3 +1,5 @@
+import random
+
 NUM_EPISODES = 150
 MAX_STEPS_PER_EPISODE = 20
 LEARNING_RATE = 0.01  # a parameter
